@@ -4,10 +4,20 @@ import subprocess
 
 __all__ = ['exe', 'output', 'error', 'stdout', 'stderr']
 
+def _poll(p):
+   while True:
+      nextline = p.stdout.readline()
+      if nextline == '' and p.poll() != None:
+         break
+      sys.stdout.write(nextline)
+      sys.stdout.flush()
 
 def exe(command, stdout=None, stderr=None, stdin=None):
 
    p = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+
+   _poll(p)
+
    out, err = p.communicate()
 
    return out, err
@@ -34,6 +44,9 @@ class cmd:
    def __add__ (self, option):
       self._cmd.append(option)
       return self
+   def __sub__ (self, option):
+      self._cmd.insert(0, option)
+      return self
 
 
    def exe(self, stdout=None, stderr=None, stdin=None):
@@ -42,8 +55,11 @@ class cmd:
 
       self._out, self._err = exe(s, stdout, stderr, stdin)
 
-      if self._err :
-          self._write_stderr(stderr)
+      #if self._err :
+      #    self._write_stderr(stderr)
+
+      if self._err:
+         print self._err
 
       self._write_stdout(stdout)
 
