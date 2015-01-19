@@ -25,12 +25,14 @@ def exe(command, stdout=None, stderr=None, stdin=None):
 
 class cmd:
 
-   def __init__(self, command, stdout=None, stderr=None, stdin=None):
+   def __init__(self, command, stdout=None, stderr=None, stdin=None, debug=False):
       self._cmd = [command]
 
       self._stdout = stdout
       self._stderr = stderr
       self._stdin  = stdin
+
+      self._debug  = debug
 
       self._out = None
       self._err = None
@@ -52,6 +54,10 @@ class cmd:
    def exe(self, stdout=None, stderr=None, stdin=None):
 
       s = " ".join( self._cmd )
+
+      if self._debug:
+         print s
+         return
 
       self._out, self._err = exe(s, stdout, stderr, stdin)
 
@@ -111,6 +117,12 @@ def main():
 
 
    print exe('ls')[0]
+
+
+   print ">>> debug mode"
+   b = cmd('ls', debug = True)
+   b()
+
 
 if __name__ == "__main__":
    #import doctest
