@@ -4,21 +4,30 @@ import subprocess
 
 __all__ = ['exe', 'output', 'error', 'stdout', 'stderr']
 
-def _poll(p):
+def _polling(p):
+   save_stdout = ''
    while True:
       nextline = p.stdout.readline()
+      save_stdout += nextline
       if nextline == '' and p.poll() != None:
          break
       sys.stdout.write(nextline)
       sys.stdout.flush()
+   return save_stdout
 
 def exe(command, stdout=None, stderr=None, stdin=None):
 
-   p = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+   p = subprocess.Popen(command,
+                        stdin  = subprocess.PIPE,
+                        stdout = subprocess.PIPE,
+                        stderr = subprocess.PIPE,
+                        shell=True)
 
-   _poll(p)
+   out = _polling(p)
 
-   out, err = p.communicate()
+   out2, err = p.communicate()
+
+   out += out2
 
    return out, err
 
@@ -61,11 +70,7 @@ class cmd:
 
       self._out, self._err = exe(s, stdout, stderr, stdin)
 
-      #if self._err :
-      #    self._write_stderr(stderr)
-
-      if self._err:
-         print self._err
+      self._write_stderr(stderr)
 
       self._write_stdout(stdout)
 
@@ -81,6 +86,7 @@ class cmd:
           print >> f, self._out
 
    def _write_stderr(self, stderr=None):
+       if not self._err : return
        print "[CMD] ERROR"
        print self._err
        if not stderr:
@@ -105,6 +111,11 @@ class cmd:
 
 
 def main():
+   c = cmd(sys.argv[1])
+   c()
+
+
+def debug():
 
    a = cmd("ls")
    print a
@@ -123,9 +134,12 @@ def main():
    b = cmd('ls', debug = True)
    b()
 
+   b = cmd('ls -l')
+
+   b(stdout='out')
+
 
 if __name__ == "__main__":
-   #import doctest
-   #doctest.testmod()
+   #debug()
    main()
 
