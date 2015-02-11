@@ -12,5 +12,6 @@ setup(
    author_email=config.author_email,
    url=config.url,
    packages=find_packages(),
+   data_files=['shcmd.py']
 
 )
