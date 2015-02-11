@@ -110,36 +110,8 @@ class cmd:
       return self._stdin
 
 
-def main():
-   c = cmd(sys.argv[1])
-   c()
-
-
-def debug():
-
-   a = cmd("ls")
-   print a
-   a()
-
-   print a.output()
-
-   a += '-l'
-   print a()
-
-
-   print exe('ls')[0]
-
-
-   print ">>> debug mode"
-   b = cmd('ls', debug = True)
-   b()
-
-   b = cmd('ls -l')
-
-   b(stdout='out')
-
 
 if __name__ == "__main__":
-   #debug()
-   main()
+
+   cmd(sys.argv[1])()
 
