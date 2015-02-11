@@ -2,11 +2,11 @@
 import sys
 import subprocess
 
-name    = 'cmd'
+name    = 'shcmd'
 version = 0.1
 description = ''
 
-__all__ = ['exe', 'cmd']
+__all__ = ['exe', 'shcmd']
 
 def _polling(p):
    save_stdout = ''
@@ -36,7 +36,7 @@ def exe(command, stdout=None, stderr=None, stdin=None):
    return out, err
 
 
-class cmd:
+class shcmd:
 
    def __init__(self, command, stdout=None, stderr=None, stdin=None, debug=False):
       self._cmd = [command]
@@ -117,5 +117,5 @@ class cmd:
 
 if __name__ == "__main__":
 
-   cmd(sys.argv[1])()
+   shcmd(sys.argv[1])()
 
