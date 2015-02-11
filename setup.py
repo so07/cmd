@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 
-import cmd
+import config
 
 setup(
 
-   name=cmd.name,
-   version=cmd.version,
-   description=cmd.description,
-   author='so07',
-   author_email='orlandini.se@gmail.com',
-   url='https://github.com/so07/cmd',
+   name=config.name,
+   version=config.version,
+   description=config.description,
+   author=config.author,
+   author_email=config.author_email,
+   url=config.url,
    packages=find_packages(),
 
 )

@@ -1,10 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys
 import subprocess
-
-name    = 'shcmd'
-version = 0.1
-description = ''
 
 __all__ = ['exe', 'shcmd']
 
