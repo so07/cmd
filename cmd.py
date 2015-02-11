@@ -55,8 +55,8 @@ class cmd:
 
       s = " ".join( self._cmd )
 
+      print s
       if self._debug:
-         print s
          return
 
       self._out, self._err = exe(s, stdout, stderr, stdin)
