@@ -2,6 +2,10 @@
 import sys
 import subprocess
 
+name    = 'cmd'
+version = 0.1
+description = ''
+
 __all__ = ['exe', 'cmd']
 
 def _polling(p):
