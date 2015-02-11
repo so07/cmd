@@ -2,7 +2,7 @@
 import sys
 import subprocess
 
-__all__ = ['exe', 'output', 'error', 'stdout', 'stderr']
+__all__ = ['exe', 'cmd']
 
 def _polling(p):
    save_stdout = ''
