@@ -4,7 +4,9 @@ import subprocess
 
 __all__ = ['exe', 'shcmd']
 
-def _polling(p):
+def _polling(p, stdout, stderr):
+   if stdout:
+      fp = open(stdout, 'w')
    save_stdout = ''
    while True:
       nextline = p.stdout.readline()
@@ -13,6 +15,9 @@ def _polling(p):
          break
       sys.stdout.write(nextline)
       sys.stdout.flush()
+      if stdout:
+         print >> fp, nextline,
+         fp.flush()
    return save_stdout
 
 def exe(command, stdout=None, stderr=None, stdin=None):
@@ -23,7 +28,7 @@ def exe(command, stdout=None, stderr=None, stdin=None):
                         stderr = subprocess.PIPE,
                         shell=True)
 
-   out = _polling(p)
+   out = _polling(p, stdout, stderr)
 
    out2, err = p.communicate()
 
@@ -34,7 +39,12 @@ def exe(command, stdout=None, stderr=None, stdin=None):
 
 class shcmd:
 
-   def __init__(self, command, stdout=None, stderr=None, stdin=None, debug=False):
+   def __init__(self, command,
+                      stdout=None,
+                      stderr=None,
+                      stdin=None,
+                      debug=False):
+
       self._cmd = [command]
 
       self._stdout = stdout
@@ -68,7 +78,7 @@ class shcmd:
       if self._debug:
          return
 
-      self._out, self._err = exe(s, stdout, stderr, stdin)
+      self._out, self._err = exe(s, self._stdout, self._stderr, self._stdin)
 
       self._write_stderr(stderr)
 
@@ -113,5 +123,9 @@ class shcmd:
 
 if __name__ == "__main__":
 
-   shcmd(sys.argv[1])()
+   #shcmd(sys.argv[1])()
+
+   c = shcmd("ls -l; sleep 30", stdout = 'log')
+
+   c()
 
