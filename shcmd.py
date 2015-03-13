@@ -6,19 +6,33 @@ __all__ = ['exe', 'shcmd']
 
 def _polling(p, stdout, stderr):
    if stdout:
-      fp = open(stdout, 'w')
+      op = open(stdout, 'w')
+   if stderr:
+      ep = open(stderr, 'w')
    save_stdout = ''
+   save_stderr = ''
    while True:
-      nextline = p.stdout.readline()
-      save_stdout += nextline
-      if nextline == '' and p.poll() != None:
+      line_out = p.stdout.readline()
+      line_err = p.stderr.readline()
+      if not line_out and not line_err and p.poll() is not None:
          break
-      sys.stdout.write(nextline)
+      save_stdout += line_out
+      sys.stdout.write(line_out)
       sys.stdout.flush()
       if stdout:
-         print >> fp, nextline,
-         fp.flush()
-   return save_stdout
+         print >> op, line_out,
+         op.flush()
+      save_stderr += line_err
+      sys.stderr.write(line_err)
+      sys.stderr.flush()
+      if stderr:
+         print >> ep, line_err,
+         ep.flush()
+   if stdout:
+       op.close()
+   if stderr:
+       ep.close()
+   return save_stdout, save_stderr
 
 def exe(command, stdout=None, stderr=None, stdin=None):
 
@@ -28,11 +42,12 @@ def exe(command, stdout=None, stderr=None, stdin=None):
                         stderr = subprocess.PIPE,
                         shell=True)
 
-   out = _polling(p, stdout, stderr)
+   out, err = _polling(p, stdout, stderr)
 
-   out2, err = p.communicate()
+   out2, err2 = p.communicate()
 
    out += out2
+   err += err2
 
    return out, err
 
@@ -97,8 +112,8 @@ class shcmd:
 
    def _write_stderr(self, stderr=None):
        if not self._err : return
-       print "[CMD] ERROR"
-       print self._err
+       print "[CMD] STDERR :", self._err
+       #print self._err
        if not stderr:
            stderr = self._stderr
        if not stderr:
