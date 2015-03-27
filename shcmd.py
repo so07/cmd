@@ -89,7 +89,7 @@ def _poll(p, stdout, stderr):
    return _out, _err
 
 
-def exe(command, stdout=None, stderr=None, stdin=None, merge_outerr=False):
+def exe(command, stdout=None, stderr=None, stdin=None, merge_outerr=True):
 
    pipe_out = subprocess.PIPE
    pipe_err = subprocess.PIPE
