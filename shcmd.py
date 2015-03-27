@@ -35,13 +35,14 @@ class AsynchronousFileReader(threading.Thread):
 
 def _poll(p, stdout, stderr):
 
+   if stdout and os.path.isfile(stdout):
+      os.remove(stdout)
+   if stderr and os.path.isfile(stderr):
+      os.remove(stderr)
+
    if stdout:
-      if os.path.isfile(stdout):
-         os.remove(stdout)
       op = open(stdout, 'a')
    if stderr:
-      if os.path.isfile(stderr):
-         os.remove(stderr)
       ep = open(stderr, 'a')
 
    # Launch the asynchronous readers of the process' stdout and stderr.
@@ -95,7 +96,8 @@ def exe(command, stdout=None, stderr=None, stdin=None, merge_outerr=True):
    pipe_err = subprocess.PIPE
 
    if merge_outerr:
-       pipe_err = subprocess.STDOUT
+       #pipe_err = subprocess.STDOUT
+       stderr = stdout
 
    p = subprocess.Popen(command,
                         stdin  = subprocess.PIPE,
