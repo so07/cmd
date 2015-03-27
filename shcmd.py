@@ -1,64 +1,123 @@
 #!/usr/bin/env python
 import sys
+import os
 import subprocess
+import threading
+import Queue
+
 
 __all__ = ['exe', 'shcmd']
 
-def _polling(p, stdout, stderr):
-   if stdout:
-      op = open(stdout, 'w')
-   if stderr:
-      ep = open(stderr, 'w')
-   save_stdout = ''
-   save_stderr = ''
-   while True:
-      line_out = p.stdout.readline()
-      line_err = p.stderr.readline()
-      if not line_out and not line_err and p.poll() is not None:
-         break
-      save_stdout += line_out
-      sys.stdout.write(line_out)
-      sys.stdout.flush()
-      if stdout:
-         print >> op, line_out,
-         op.flush()
-      save_stderr += line_err
-      sys.stderr.write(line_err)
-      sys.stderr.flush()
-      if stderr:
-         print >> ep, line_err,
-         ep.flush()
-   if stdout:
-       op.close()
-   if stderr:
-       ep.close()
-   return save_stdout, save_stderr
 
-def exe(command, stdout=None, stderr=None, stdin=None):
+class AsynchronousFileReader(threading.Thread):
+    '''
+    Helper class to implement asynchronous reading of a file
+    in a separate thread. Pushes read lines on a queue to
+    be consumed in another thread.
+    '''
+
+    def __init__(self, fd, queue):
+        assert isinstance(queue, Queue.Queue)
+        assert callable(fd.readline)
+        threading.Thread.__init__(self)
+        self._fd = fd
+        self._queue = queue
+ 
+    def run(self):
+        '''Read lines and put them on the queue.'''
+        for line in iter(self._fd.readline, ''):
+            self._queue.put(line)
+ 
+    def eof(self):
+        '''Check whether there is no more content to expect.'''
+        return not self.is_alive() and self._queue.empty()
+
+
+def _poll(p, stdout, stderr):
+
+   if stdout:
+      if os.path.isfile(stdout):
+         os.remove(stdout)
+      op = open(stdout, 'a')
+   if stderr:
+      if os.path.isfile(stderr):
+         os.remove(stderr)
+      ep = open(stderr, 'a')
+
+   # Launch the asynchronous readers of the process' stdout and stderr.
+   stdout_queue = Queue.Queue()
+   stdout_reader = AsynchronousFileReader(p.stdout, stdout_queue)
+   stdout_reader.start()
+   stderr_queue = Queue.Queue()
+   stderr_reader = AsynchronousFileReader(p.stderr, stderr_queue)
+   stderr_reader.start()
+
+   _out = ''
+   _err = ''
+
+   # Check the queues if we received some output (until there is nothing more to get).
+   while not stdout_reader.eof() or not stderr_reader.eof():
+
+       # receive from standard output.
+       while not stdout_queue.empty():
+           line = stdout_queue.get()
+           print line,
+           _out += line
+           if stdout:
+              op.write(line)
+              op.flush()
+ 
+       # receive from standard error.
+       while not stderr_queue.empty():
+           line = stderr_queue.get()
+           _err += line
+           print line,
+           if stderr:
+              ep.write(line)
+              ep.flush()
+ 
+   # join threads we've started.
+   stdout_reader.join()
+   stderr_reader.join()
+ 
+   if stdout:
+      op.close()
+
+   if stderr:
+      ep.close()
+
+   return _out, _err
+
+
+def exe(command, stdout=None, stderr=None, stdin=None, merge_outerr=False):
+
+   pipe_out = subprocess.PIPE
+   pipe_err = subprocess.PIPE
+
+   if merge_outerr:
+       pipe_err = subprocess.STDOUT
 
    p = subprocess.Popen(command,
                         stdin  = subprocess.PIPE,
-                        stdout = subprocess.PIPE,
-                        stderr = subprocess.PIPE,
+                        stdout = pipe_out,
+                        stderr = pipe_err,
                         shell=True)
 
-   out, err = _polling(p, stdout, stderr)
+   poll_out, poll_err = _poll(p, stdout, stderr)
+   comm_out, comm_err = p.communicate()
 
-   out2, err2 = p.communicate()
+   _out = poll_out + comm_out
+   _err = poll_err + comm_err
 
-   out += out2
-   err += err2
-
-   return out, err
+   return _out, _err
 
 
 class shcmd:
 
    def __init__(self, command,
-                      stdout=None,
-                      stderr=None,
-                      stdin=None,
-                      debug=False):
+                      stdout = None, stderr = None, stdin = None,
+                      msg = None,
+                      debug = False):
 
       self._cmd = [command]
 
@@ -66,10 +125,14 @@ class shcmd:
       self._stderr = stderr
       self._stdin  = stdin
 
+      self._msg    = msg
+
       self._debug  = debug
+
 
       self._out = None
       self._err = None
+
 
    def __str__(self):
       return str( " ".join(self._cmd) )
@@ -87,6 +150,9 @@ class shcmd:
 
    def exe(self, stdout=None, stderr=None, stdin=None):
 
+      if self._msg:
+          print "[SHCMD]", self._msg
+
       s = " ".join( self._cmd )
 
       print s
@@ -95,9 +161,8 @@ class shcmd:
 
       self._out, self._err = exe(s, self._stdout, self._stderr, self._stdin)
 
-      self._write_stderr(stderr)
-
-      self._write_stdout(stdout)
+      #self._write_stderr(stderr)
+      #self._write_stdout(stdout)
 
       return self._out
 
@@ -135,12 +200,25 @@ class shcmd:
       return self._stdin
 
 
+def main():
+   cmd = " ".join(sys.argv[1:])
+   shcmd(cmd)()
 
-if __name__ == "__main__":
-
+def debug():
    #shcmd(sys.argv[1])()
 
-   c = shcmd("ls -l; sleep 30", stdout = 'log')
+   #c = shcmd("ls;sleep 1;ls -l 1;sleep 1;ls shcmd.py; sleep 10")
+   #c = shcmd("ls;sleep 1;ls -l 1;sleep 1;ls shcmd.py; sleep 10", stdout = 'log')
+   #c = shcmd("ls;sleep 1;ls -l 1;sleep 1;ls shcmd.py; sleep 10", stdout = 'log', stderr = 'err')
+
+   c = shcmd("ls -l ", msg = 'Now a message for this command!')
 
    c()
+
+   #shcmd("ls", msg = 'Another message')()
+
+
+if __name__ == "__main__":
+   #debug()
+   main()
 
