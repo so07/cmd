@@ -33,11 +33,11 @@ class AsynchronousFileReader(threading.Thread):
         return not self.is_alive() and self._queue.empty()
 
 
-def _poll(p, stdout, stderr):
+def _poll(p, stdout, stderr, append = False):
 
-   if stdout and os.path.isfile(stdout):
+   if stdout and os.path.isfile(stdout) and not append:
       os.remove(stdout)
-   if stderr and os.path.isfile(stderr):
+   if stderr and os.path.isfile(stderr) and not append:
       os.remove(stderr)
 
    if stdout:
@@ -90,7 +90,8 @@ def _poll(p, stdout, stderr):
    return _out, _err
 
 
-def exe(command, stdout=None, stderr=None, stdin=None, merge_outerr=True):
+def exe(command, stdout=None, stderr=None, stdin=None,
+        append = False, merge_outerr=True):
 
    pipe_out = subprocess.PIPE
    pipe_err = subprocess.PIPE
@@ -105,7 +106,7 @@ def exe(command, stdout=None, stderr=None, stdin=None, merge_outerr=True):
                         stderr = pipe_err,
                         shell=True)
 
-   poll_out, poll_err = _poll(p, stdout, stderr)
+   poll_out, poll_err = _poll(p, stdout, stderr, append)
    comm_out, comm_err = p.communicate()
 
    _out = poll_out + comm_out
@@ -119,6 +120,7 @@ class shcmd:
    def __init__(self, command,
                       stdout = None, stderr = None, stdin = None,
                       msg = None,
+                      append = False,
                       debug = False):
 
       self._cmd = [command]
@@ -128,6 +130,8 @@ class shcmd:
       self._stdin  = stdin
 
       self._msg    = msg
+
+      self._append = append
 
       self._debug  = debug
 
@@ -161,7 +165,7 @@ class shcmd:
       if self._debug:
          return
 
-      self._out, self._err = exe(s, self._stdout, self._stderr, self._stdin)
+      self._out, self._err = exe(s, self._stdout, self._stderr, self._stdin, self._append)
 
       #self._write_stderr(stderr)
       #self._write_stdout(stdout)
