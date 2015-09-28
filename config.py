@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 name    = 'shcmd'
-version = 0.2
+version = '0.3'
 description = ''
 
 url = 'https://github.com/so07/shcmd'
