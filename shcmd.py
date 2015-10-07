@@ -71,8 +71,8 @@ class shcmd:
    def __str__(self):
       return str( " ".join(self._cmd) )
 
-   def __call__(self, **kwargs):
-      return self.execute(**kwargs)
+   def __call__(self):
+      return self.execute()
 
    def __add__ (self, option):
       self._cmd.append(option)
