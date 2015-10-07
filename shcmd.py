@@ -80,7 +80,7 @@ class shcmd:
       return self
 
 
-   def execute (self, stdout=None, stderr=None, stdin=None):
+   def execute (self):
 
       if self._msg:
           print "[SHCMD]", self._msg
