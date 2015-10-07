@@ -9,12 +9,12 @@ from contextlib import closing
 __all__ = ['execute', 'shcmd']
 
 
-def _poll(p, stdout, stderr):
+def _poll(p, stdout, stderr, stdmode):
 
    stdout_iterator = iter(p.stdout.readline, b"")
 
    if stdout:
-      stdout_context = open(stdout, 'w')
+      stdout_context = open(stdout, stdmode)
    else:
       stdout_context = closing(StringIO.StringIO())
 
@@ -26,7 +26,7 @@ def _poll(p, stdout, stderr):
            fo.flush()
 
 
-def execute (command, stdout=None, stderr=None, stdin=None, append=False):
+def execute (command, stdout=None, stderr=None, stdin=None, stdmode='a'):
 
    p = subprocess.Popen(command,
                         stdin  = subprocess.PIPE,
@@ -34,7 +34,7 @@ def execute (command, stdout=None, stderr=None, stdin=None, append=False):
                         stderr = subprocess.STDOUT,
                         shell=True)
 
-   _poll(p, stdout, stderr)
+   _poll(p, stdout, stderr, stdmode)
 
    _out, _err = p.communicate()
 
@@ -63,9 +63,12 @@ class shcmd:
       self._verbose = verbose
       self._debug  = debug
 
-
       self._out = None
       self._err = None
+
+      self._stdmode = 'w'
+      if self._append:
+         self._stdmode = 'a'
 
 
    def __str__(self):
@@ -93,7 +96,13 @@ class shcmd:
       if self._debug:
          return
 
-      self._out, self._err = execute(cmd_string, self._stdout, self._stderr, self._stdin, self._append)
+      if self._stdout:
+         if self._verbose:
+            print "[SHCMD]", self._stdout
+         with open(self._stdout, self._stdmode) as f:
+            f.write("[SHCMD] " + cmd_string + "\n")
+
+      self._out, self._err = execute(cmd_string, self._stdout, self._stderr, self._stdin, self._stdmode)
 
       return self._out
 
