@@ -47,6 +47,7 @@ class shcmd:
                       stdout = None, stderr = None, stdin = None,
                       msg = None,
                       append = False,
+                      verbose = False,
                       debug = False):
 
       self._cmd = [command]
@@ -59,6 +60,7 @@ class shcmd:
 
       self._append = append
 
+      self._verbose = verbose
       self._debug  = debug
 
 
