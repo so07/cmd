@@ -92,7 +92,8 @@ class shcmd:
 
       cmd_string = " ".join( self._cmd )
 
-      print cmd_string
+      print "[SHCMD]", cmd_string
+
       if self._debug:
          return
 
