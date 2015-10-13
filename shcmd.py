@@ -18,13 +18,17 @@ def _poll(p, stdout, stderr, stdmode):
    else:
       stdout_context = closing(StringIO.StringIO())
 
+   stdout_save = ''
+
    with stdout_context as fo:
 
       for o in stdout_iterator:
            print o,
            fo.write(o)
            fo.flush()
+           stdout_save += o
 
+   return stdout_save.strip(), ''
 
 def execute (command, stdout=None, stderr=None, stdin=None, stdmode='a'):
 
@@ -34,9 +38,15 @@ def execute (command, stdout=None, stderr=None, stdin=None, stdmode='a'):
                         stderr = subprocess.STDOUT,
                         shell=True)
 
-   _poll(p, stdout, stderr, stdmode)
+   _out, _err = _poll(p, stdout, stderr, stdmode)
 
-   _out, _err = p.communicate()
+   _out2, _err2 = p.communicate()
+
+   if _out2:
+      _out += _out2
+
+   if _err2:
+      _err += _err2
 
    return _out, _err
 
