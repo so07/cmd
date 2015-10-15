@@ -9,7 +9,7 @@ from contextlib import closing
 __all__ = ['execute', 'shcmd']
 
 
-def _poll(p, stdout, stderr, stdmode):
+def _poll(p, stdout, stderr, stdmode, silent=False):
 
    stdout_iterator = iter(p.stdout.readline, b"")
 
@@ -23,14 +23,15 @@ def _poll(p, stdout, stderr, stdmode):
    with stdout_context as fo:
 
       for o in stdout_iterator:
-           print o,
+           if not silent:
+               print o,
            fo.write(o)
            fo.flush()
            stdout_save += o
 
    return stdout_save.strip(), ''
 
-def execute (command, stdout=None, stderr=None, stdin=None, stdmode='a'):
+def execute (command, stdout=None, stderr=None, stdin=None, stdmode='a', silent=False):
 
    p = subprocess.Popen(command,
                         stdin  = subprocess.PIPE,
@@ -38,7 +39,7 @@ def execute (command, stdout=None, stderr=None, stdin=None, stdmode='a'):
                         stderr = subprocess.STDOUT,
                         shell=True)
 
-   _out, _err = _poll(p, stdout, stderr, stdmode)
+   _out, _err = _poll(p, stdout, stderr, stdmode, silent)
 
    _out2, _err2 = p.communicate()
 
@@ -48,7 +49,7 @@ def execute (command, stdout=None, stderr=None, stdin=None, stdmode='a'):
    if _err2:
       _err += _err2
 
-   return _out, _err
+   return _out, _err, p.returncode
 
 
 class shcmd:
@@ -115,9 +116,9 @@ class shcmd:
          with open(self._stdout, self._stdmode) as f:
             f.write("[SHCMD] " + cmd_string + "\n")
 
-      self._out, self._err = execute(cmd_string, self._stdout, self._stderr, self._stdin, self._stdmode)
+      self._out, self._err, self._errorcode = execute(cmd_string, self._stdout, self._stderr, self._stdin, self._stdmode, self._silent)
 
-      return self._out
+      return self._out, self._err, self._errorcode
 
 
    def output(self):
