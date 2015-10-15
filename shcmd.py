@@ -57,6 +57,7 @@ class shcmd:
                       stdout = None, stderr = None, stdin = None,
                       msg = None,
                       append = False,
+                      silent = False,
                       verbose = False,
                       debug = False):
 
@@ -69,7 +70,7 @@ class shcmd:
       self._msg    = msg
 
       self._append = append
-
+      self._silent = silent
       self._verbose = verbose
       self._debug  = debug
 
@@ -97,12 +98,13 @@ class shcmd:
 
    def execute (self):
 
-      if self._msg:
+      if self._msg and not self._silent:
           print "[SHCMD]", self._msg
 
       cmd_string = " ".join( self._cmd )
 
-      print "[SHCMD]", cmd_string
+      if not self._silent:
+         print "[SHCMD]", cmd_string
 
       if self._debug:
          return
