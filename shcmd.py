@@ -6,11 +6,14 @@ import StringIO
 
 from contextlib import closing
 
+from itertools import izip_longest as zip
+
 __all__ = ['execute', 'shcmd']
 
 
 def _poll(p, stdout, stderr, stdmode, silent=False):
 
+   # init stdout
    stdout_iterator = iter(p.stdout.readline, b"")
 
    if stdout:
@@ -20,23 +23,55 @@ def _poll(p, stdout, stderr, stdmode, silent=False):
 
    stdout_save = ''
 
-   with stdout_context as fo:
+   # init stderr
+   if p.stderr:
+      stderr_iterator = iter(p.stderr.readline, b"")
+   else:
+      # empty iterator
+      stderr_iterator = iter([])
 
-      for o in stdout_iterator:
-           if not silent:
-               print o,
-           fo.write(o)
-           fo.flush()
-           stdout_save += o
+   if stderr:
+      stderr_context = open(stderr, stdmode)
+   else:
+      stderr_context = closing(StringIO.StringIO())
 
-   return stdout_save.strip(), ''
+   stderr_save = ''
+
+   # open contexts for stdout and stderr
+   with stdout_context as fo, stderr_context as fe:
+
+      for o, e in zip(stdout_iterator, stderr_iterator):
+
+           if o:
+              if not silent:
+                 print o,
+              fo.write(o)
+              fo.flush()
+              stdout_save += o
+
+           if e:
+              if not silent:
+                 print e,
+              fe.write(e)
+              fe.flush()
+              stderr_save += e
+
+   return stdout_save.strip(), stderr_save.strip()
+
 
 def execute (command, stdout=None, stderr=None, stdin=None, stdmode='a', silent=False):
 
+   stdout_pipe = subprocess.PIPE
+
+   if stdout == stderr:
+      stderr_pipe = subprocess.STDOUT
+   else:
+      stderr_pipe = subprocess.PIPE
+
    p = subprocess.Popen(command,
                         stdin  = subprocess.PIPE,
-                        stdout = subprocess.PIPE,
-                        stderr = subprocess.STDOUT,
+                        stdout = stdout_pipe,
+                        stderr = stderr_pipe,
                         shell=True)
 
    _out, _err = _poll(p, stdout, stderr, stdmode, silent)
