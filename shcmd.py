@@ -61,17 +61,10 @@ def _poll(p, stdout, stderr, stdmode, silent=False):
 
 def execute (command, stdout=None, stderr=None, stdin=None, stdmode='a', silent=False):
 
-   stdout_pipe = subprocess.PIPE
-
-   if stdout == stderr:
-      stderr_pipe = subprocess.STDOUT
-   else:
-      stderr_pipe = subprocess.PIPE
-
    p = subprocess.Popen(command,
-                        stdin  = subprocess.PIPE,
-                        stdout = stdout_pipe,
-                        stderr = stderr_pipe,
+                        #stdin  = subprocess.PIPE,
+                        stdout = subprocess.PIPE,
+                        stderr = subprocess.STDOUT,
                         shell=True)
 
    _out, _err = _poll(p, stdout, stderr, stdmode, silent)
