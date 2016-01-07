@@ -24,13 +24,13 @@ def _poll(p, stdout, stderr, stdmode, silent=False):
    stdout_save = ''
 
    # init stderr
-   if p.stderr:
+   if p.stderr and p.stdout != p.stderr:
       stderr_iterator = iter(p.stderr.readline, b"")
    else:
       # empty iterator
       stderr_iterator = iter([])
 
-   if stderr:
+   if stderr and stderr != stdout:
       stderr_context = open(stderr, stdmode)
    else:
       stderr_context = closing(StringIO.StringIO())
