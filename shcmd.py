@@ -144,7 +144,8 @@ class shcmd:
          with open(self._stdout, self._stdmode) as f:
             f.write("[SHCMD] " + cmd_string + "\n")
 
-      self._out, self._err, self._errorcode = execute(cmd_string, self._stdout, self._stderr, self._stdin, self._stdmode, self._silent)
+      # NB stdmode always 'a' calling execute. Thus command string in stdout file
+      self._out, self._err, self._errorcode = execute(cmd_string, self._stdout, self._stderr, self._stdin, 'a', self._silent)
 
       return self._out, self._err, self._errorcode
 
