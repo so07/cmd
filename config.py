@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 name    = 'shcmd'
-version = '0.5.3'
+version = '0.6.0'
 
 description = ''
 
