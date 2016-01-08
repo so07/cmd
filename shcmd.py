@@ -6,7 +6,7 @@ import StringIO
 
 from contextlib import closing
 
-from itertools import izip_longest as zip
+from itertools import izip_longest
 
 __all__ = ['execute', 'shcmd']
 
@@ -40,7 +40,7 @@ def _poll(p, stdout, stderr, stdmode, silent=False):
    # open contexts for stdout and stderr
    with stdout_context as fo, stderr_context as fe:
 
-      for o, e in zip(stdout_iterator, stderr_iterator):
+      for o, e in izip_longest(stdout_iterator, stderr_iterator):
 
            if o:
               if not silent:
