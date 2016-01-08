@@ -3,7 +3,7 @@
 name    = 'shcmd'
 version = '0.6.1'
 
-description = ''
+description = 'Invoke command in shell.'
 
 url = 'https://github.com/so07/shcmd'
 
