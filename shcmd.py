@@ -127,22 +127,23 @@ class shcmd:
 
    def execute (self):
 
-      if self._msg and not self._silent:
-          print "[SHCMD]", self._msg
-
       cmd_string = " ".join( self._cmd )
 
       if not self._silent:
+         if self._verbose and self._stdout:
+             print "[SHCMD] STDOUT", self._stdout
+         if self._msg:
+             print "[SHCMD]", self._msg
          print "[SHCMD]", cmd_string
 
       if self._debug:
          return
 
       if self._stdout:
-         if self._verbose:
-            print "[SHCMD]", self._stdout
          with open(self._stdout, self._stdmode) as f:
-            f.write("[SHCMD] " + cmd_string + "\n")
+            if self._msg:
+                print >> f, "[SHCMD]", self._msg
+            print >> f, "[SHCMD]", cmd_string
 
       # NB stdmode always 'a' calling execute. Thus command string in stdout file
       self._out, self._err, self._errorcode = execute(cmd_string, self._stdout, self._stderr, self._stdin, 'a', self._silent)
