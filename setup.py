@@ -13,12 +13,17 @@ with open(
 
 setup(
     name="shcmd",
-    version="0.7.1",
+    version="0.7.2",
     description="Invoke command in shell.",
     long_description=long_description,
     author="so07",
     author_email="orlandini.se@gmail.com",
     url="https://github.com/so07/shcmd",
-    packages=find_packages(),
-    data_files=["shcmd.py"],
+    packages=find_packages("src"),
+    package_dir={"": "src"},
+    entry_points={
+        "console_scripts": [
+            "shcmd=shcmd.main:main",
+        ],
+    },
 )
