@@ -23,7 +23,7 @@ $ python script.py
 Cloning into 'shcmd'...
 ```
 
-Another example is the following script
+Another example is the following
 ```python
 from shcmd.shcmd import shcmd
 
@@ -33,7 +33,7 @@ ls += "shcmd"
 ls()
 ```
 
-This is the output of the command above:
+This is the output of the command above
 ```
 [SHCMD] ls shcmd
 CHANGELOG.md
