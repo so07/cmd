@@ -8,7 +8,7 @@ def main():
 
     parser = argparse.ArgumentParser(
         prog="shcmd",
-        description="""Simple wrapper to shcmd module.""",
+        description="""Command shell execution with shcmd module.""",
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
