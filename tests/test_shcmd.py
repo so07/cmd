@@ -4,15 +4,18 @@ from shcmd.shcmd import shcmd
 import random
 import string
 
+
 def get_random_string(length=10):
     letters = string.ascii_lowercase
-    result_str = ''.join(random.choice(letters) for i in range(length))
+    result_str = "".join(random.choice(letters) for i in range(length))
     return result_str
+
 
 class TestClass:
     def test_one(self):
         x = "this"
         assert "h" in x
+
 
 def test_import():
     import shcmd
@@ -35,6 +38,7 @@ def test_touch(tmpdir):
 
 def test_str():
     assert str(shcmd("test this command")) == "test this command"
+
 
 class TestTouch:
 
@@ -71,7 +75,7 @@ class TestTouch:
     def test_touch_sub(self, tmpdir):
 
         c = shcmd(os.path.join(tmpdir, TestTouch.filename))
-        c-= "touch"
+        c -= "touch"
 
         c()
 
@@ -129,10 +133,9 @@ def test_is_error_true():
 
     assert error_code != 0
 
+
 def test_is_error_false():
 
     _, _, error_code = shcmd("ls")()
 
     assert error_code == 0
-
-
