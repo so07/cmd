@@ -2,15 +2,23 @@
 
 from setuptools import setup, find_packages
 
-from . import config
+# read the contents of your README file
+from os import path
+
+with open(
+    path.join(path.abspath(path.dirname(__file__)), "README.md"), encoding="utf-8"
+) as f:
+    long_description = f.read()
+
 
 setup(
-    name=config.name,
-    version=config.version,
-    description=config.description,
-    author=config.author,
-    author_email=config.author_email,
-    url=config.url,
+    name="shcmd",
+    version="0.7.1",
+    description="Invoke command in shell.",
+    long_description=long_description,
+    author="so07",
+    author_email="orlandini.se@gmail.com",
+    url="https://github.com/so07/shcmd",
     packages=find_packages(),
     data_files=["shcmd.py"],
 )
