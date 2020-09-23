@@ -13,7 +13,7 @@ with open(
 
 setup(
     name="shcmd",
-    version="0.7.2",
+    version="0.7.3",
     description="Invoke command in shell.",
     long_description=long_description,
     author="so07",
