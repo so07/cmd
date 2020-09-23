@@ -1,3 +1,6 @@
+# 0.7.3
+- travis build
+
 # 0.7.2
 - shcmd cli to shcmd module
 
