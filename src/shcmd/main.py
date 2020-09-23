@@ -49,6 +49,13 @@ def main():
     )
 
     parser.add_argument(
+        "-m",
+        "--message",
+        dest="message",
+        help="print a message before execution of command. (default %(default)s)",
+    )
+
+    parser.add_argument(
         "-a",
         "--append",
         dest="append",
@@ -78,13 +85,6 @@ def main():
         dest="debug",
         action="store_true",
         help="enable debug mode. (default %(default)s)",
-    )
-
-    parser.add_argument(
-        "-m",
-        "--message",
-        dest="message",
-        help="print a message before execution of command. (default %(default)s)",
     )
 
     args = parser.parse_args()
