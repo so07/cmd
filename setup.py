@@ -19,6 +19,11 @@ setup(
     author="so07",
     author_email="orlandini.se@gmail.com",
     url="https://github.com/so07/shcmd",
-    packages=find_packages(),
-    data_files=["shcmd.py"],
+    packages=find_packages("src"),
+    package_dir={"": "src"},
+    entry_points={
+        "console_scripts": [
+            "shcmd=shcmd.main:main",
+        ],
+    },
 )
