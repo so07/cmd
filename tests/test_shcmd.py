@@ -114,6 +114,36 @@ class TestTouch:
 
         assert ls_cmd.error() == ""
 
+    def test_stdout(self, tmpdir):
+        """test for shcmd stdout"""
+
+        self._touch_command(tmpdir)()
+
+        file_out = os.path.join(tmpdir, "a" + get_random_string())
+
+        cmd = shcmd("ls -t " + str(tmpdir), stdout=file_out)
+
+        assert not os.path.isfile(file_out)
+
+        cmd()
+
+        assert cmd.stdout() == file_out
+
+        assert os.path.isfile(file_out)
+
+        with open(file_out, "r") as fptr:
+            data = fptr.read().strip()
+
+        assert (
+            data
+            == "[SHCMD] ls -t "
+            + str(tmpdir)
+            + "\n"
+            + os.path.basename(file_out)
+            + "\n"
+            + TestTouch.filename
+        )
+
 
 def test_execute(tmpdir):
     """test shcmd execute function"""
@@ -130,14 +160,112 @@ def test_execute(tmpdir):
 def test_is_error_true():
     """test for not valid shcmd error code"""
 
-    _, _, error_code = shcmd(get_random_string())()
+    cmd = shcmd(get_random_string())
+
+    _, _, error_code = cmd()
 
     assert error_code != 0
+    assert cmd.is_error()
 
 
 def test_is_error_false():
     """test for valid shcmd error code"""
 
-    _, _, error_code = shcmd("ls")()
+    cmd = shcmd("ls")
+
+    _, _, error_code = cmd()
 
     assert error_code == 0
+    assert not cmd.is_error()
+
+
+def test_stdout(tmpdir):
+    """test for shcmd stdout method"""
+
+    file_out = os.path.join(tmpdir, get_random_string())
+
+    cmd = shcmd(get_random_string(), stdout=file_out)
+
+    assert cmd.stdout() == file_out
+
+
+def test_stderr(tmpdir):
+    """test for shcmd stderr method"""
+
+    file_err = os.path.join(tmpdir, get_random_string())
+
+    cmd = shcmd(get_random_string(), stderr=file_err)
+
+    assert cmd.stderr() == file_err
+
+
+def test_stdinp(tmpdir):
+    """test for shcmd stdin method"""
+
+    file_inp = os.path.join(tmpdir, get_random_string())
+
+    cmd = shcmd(get_random_string(), stdin=file_inp)
+
+    assert cmd.stdin() == file_inp
+
+
+def test_stdout(tmpdir):
+    """test for shcmd stdout"""
+
+    msg = "a message"
+    file_out = os.path.join(tmpdir, get_random_string())
+
+    cmd = shcmd("touch", msg=msg, stdout=file_out)
+    cmd += os.path.join(tmpdir, TestTouch.filename)
+
+    cmd()
+
+    with open(file_out, "r") as fptr:
+        data = fptr.read().strip()
+
+    assert data == "[SHCMD] " + msg + "\n[SHCMD] " + str(cmd)
+
+
+def test_msg(tmpdir):
+    """test for shcmd message"""
+
+    msg = "a message"
+    file_out = os.path.join(tmpdir, get_random_string())
+
+    cmd = shcmd("touch", msg=msg, stdout=file_out)
+    cmd += os.path.join(tmpdir, TestTouch.filename)
+
+    cmd()
+
+    with open(file_out, "r") as fptr:
+        data = fptr.read().strip()
+
+    assert data == "[SHCMD] " + msg + "\n[SHCMD] " + str(cmd)
+
+
+def test_append(tmpdir):
+    """test for shcmd append"""
+
+    file_out = os.path.join(tmpdir, get_random_string())
+
+    cmd1 = shcmd("touch", stdout=file_out, append=False)
+    cmd1 += os.path.join(tmpdir, TestTouch.filename)
+
+    cmd1()
+
+    cmd2 = shcmd("touch", stdout=file_out, append=True)
+    cmd2 += os.path.join(tmpdir, TestTouch.filename)
+
+    cmd2()
+
+    with open(file_out, "r") as fptr:
+        data = fptr.read().strip()
+
+    assert data == "[SHCMD] " + str(cmd1) + "\n[SHCMD] " + str(cmd2)
+
+    cmd1()
+
+    with open(file_out, "r") as fptr:
+        data = fptr.read().strip()
+
+    assert data == "[SHCMD] " + str(cmd1)

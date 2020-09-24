@@ -1,3 +1,8 @@
+"""
+example usage for shcmd module
+"""
+
+
 def test_example():
     """test for shcmd example usage"""
 
