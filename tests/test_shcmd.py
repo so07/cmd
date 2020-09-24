@@ -37,10 +37,10 @@ class TestTouch:
     def _touch_command(path):
         """return shcmd instance for touch a file in the path directory"""
 
-        c = shcmd("touch")
-        c += os.path.join(path, TestTouch.filename)
+        cmd = shcmd("touch")
+        cmd += os.path.join(path, TestTouch.filename)
 
-        return c
+        return cmd
 
     def test_touch_call(self, tmpdir):
         """test for shcmd call method"""
@@ -59,30 +59,30 @@ class TestTouch:
     def test_touch_add(self, tmpdir):
         """test for shcmd add method"""
 
-        c = self._touch_command(tmpdir)
-        c += os.path.join(tmpdir, "another_file")
+        cmd = self._touch_command(tmpdir)
+        cmd += os.path.join(tmpdir, "another_file")
 
-        c()
+        cmd()
 
         assert os.listdir(tmpdir) == [TestTouch.filename, "another_file"]
 
     def test_touch_sub(self, tmpdir):
         """test for shcmd sub method"""
 
-        c = shcmd(os.path.join(tmpdir, TestTouch.filename))
-        c -= "touch"
+        cmd = shcmd(os.path.join(tmpdir, TestTouch.filename))
+        cmd -= "touch"
 
-        c()
+        cmd()
 
         assert os.listdir(tmpdir) == [TestTouch.filename]
 
     def test_debug(self, tmpdir):
         """test for shcmd debug option"""
 
-        c = shcmd("touch", debug=True)
-        c += os.path.join(tmpdir, TestTouch.filename)
+        cmd = shcmd("touch", debug=True)
+        cmd += os.path.join(tmpdir, TestTouch.filename)
 
-        c()
+        cmd()
 
         assert os.listdir(tmpdir) == []
 
@@ -98,21 +98,21 @@ class TestTouch:
 
         self._touch_command(tmpdir)()
 
-        ls = shcmd("ls " + str(tmpdir))
-        ls()
+        ls_cmd = shcmd("ls " + str(tmpdir))
+        ls_cmd()
 
-        assert ls.output() == TestTouch.filename
-        assert ls.error() == ""
+        assert ls_cmd.output() == TestTouch.filename
+        assert ls_cmd.error() == ""
 
     def test_touch_ls_error(self, tmpdir):
         """test shcmd error method with touch and ls commands"""
 
         self._touch_command(tmpdir)()
 
-        ls = shcmd("ls " + get_random_string())
-        ls()
+        ls_cmd = shcmd("ls " + get_random_string())
+        ls_cmd()
 
-        assert ls.error() == ""
+        assert ls_cmd.error() == ""
 
 
 def test_execute(tmpdir):
