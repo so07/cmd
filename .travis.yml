@@ -17,6 +17,7 @@ after_success:
   - coverage run -m pytest
   - coverage report
   - coverage html
+  - coveralls
 
 notifications:
    email:
