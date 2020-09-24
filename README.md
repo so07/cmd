@@ -1,6 +1,7 @@
 # shcmd
 
 [![Build Status](https://travis-ci.com/so07/shcmd.svg?token=CFvNdbNXiYKX1TcDAvWp&branch=master)](https://travis-ci.com/so07/shcmd)
+[![Coverage Status](https://coveralls.io/repos/github/so07/shcmd/badge.svg?branch=master)](https://coveralls.io/github/so07/shcmd?branch=master)
 
 Invoke command in shell.
 
