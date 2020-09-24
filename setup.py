@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-
+from os import path
 from setuptools import setup, find_packages
 
 # read the contents of your README file
-from os import path
-
 with open(
     path.join(path.abspath(path.dirname(__file__)), "README.md"), encoding="utf-8"
 ) as f:
