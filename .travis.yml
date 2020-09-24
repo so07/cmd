@@ -6,7 +6,19 @@ python:
 
 install:
   - pip install .
+  - pip install coverage
+  - pip install coveralls
 
 script:
   - shcmd -h
   - pytest
+
+after_success:
+  - coverage run -m pytest
+  - coverage report
+  - coverage html
+
+notifications:
+   email:
+      on_success: change
+      on_failure: always
