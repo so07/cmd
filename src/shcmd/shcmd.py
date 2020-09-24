@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
+"""
+shcmd module
+"""
 
-import sys
-import os
 import subprocess
 import io
 
@@ -12,10 +13,10 @@ from itertools import zip_longest
 __all__ = ["execute", "shcmd"]
 
 
-def _poll(p, stdout, stderr, stdmode, silent=False):
+def _poll(proc, stdout, stderr, stdmode, silent=False):
 
     # init stdout
-    stdout_iterator = iter(p.stdout.readline, b"")
+    stdout_iterator = iter(proc.stdout.readline, b"")
 
     if stdout:
         stdout_context = open(stdout, stdmode)
@@ -25,8 +26,8 @@ def _poll(p, stdout, stderr, stdmode, silent=False):
     stdout_save = ""
 
     # init stderr
-    if p.stderr and p.stdout != p.stderr:
-        stderr_iterator = iter(p.stderr.readline, b"")
+    if proc.stderr and proc.stdout != proc.stderr:
+        stderr_iterator = iter(proc.stderr.readline, b"")
     else:
         # empty iterator
         stderr_iterator = iter([])
@@ -39,30 +40,31 @@ def _poll(p, stdout, stderr, stdmode, silent=False):
     stderr_save = ""
 
     # open contexts for stdout and stderr
-    with stdout_context as fo, stderr_context as fe:
+    with stdout_context as fo_cont, stderr_context as fe_cont:
 
-        for o, e in zip_longest(stdout_iterator, stderr_iterator):
+        for ito, ite in zip_longest(stdout_iterator, stderr_iterator):
 
-            if o:
+            if ito:
                 if not silent:
-                    print(o.decode("utf-8"), end="", flush=True)
-                fo.write(o.decode("utf-8"))
-                fo.flush()
-                stdout_save += o.decode("utf-8")
+                    print(ito.decode("utf-8"), end="", flush=True)
+                fo_cont.write(ito.decode("utf-8"))
+                fo_cont.flush()
+                stdout_save += ito.decode("utf-8")
 
-            if e:
+            if ite:
                 if not silent:
-                    print(e.decode("utf-8"), end="", flush=True)
-                fe.write(e.decode("utf-8"))
-                fe.flush()
-                stderr_save += e.decode("utf-8")
+                    print(ite.decode("utf-8"), end="", flush=True)
+                fe_cont.write(ite.decode("utf-8"))
+                fe_cont.flush()
+                stderr_save += ite.decode("utf-8")
 
     return stdout_save.strip(), stderr_save.strip()
 
 
 def execute(command, stdout=None, stderr=None, stdin=None, stdmode="a", silent=False):
+    """execute command in a shell"""
 
-    p = subprocess.Popen(
+    proc = subprocess.Popen(
         command,
         # stdin  = subprocess.PIPE,
         stdout=subprocess.PIPE,
@@ -70,9 +72,9 @@ def execute(command, stdout=None, stderr=None, stdin=None, stdmode="a", silent=F
         shell=True,
     )
 
-    _out, _err = _poll(p, stdout, stderr, stdmode, silent)
+    _out, _err = _poll(proc, stdout, stderr, stdmode, silent)
 
-    _out2, _err2 = p.communicate()
+    _out2, _err2 = proc.communicate()
 
     if _out2:
         _out += _out2
@@ -80,10 +82,12 @@ def execute(command, stdout=None, stderr=None, stdin=None, stdmode="a", silent=F
     if _err2:
         _err += _err2
 
-    return _out, _err, p.returncode
+    return _out, _err, proc.returncode
 
 
 class shcmd:
+    """shcmd Class to invoke command in a shell from python scripts"""
+
     def __init__(
         self,
         command,
@@ -134,6 +138,7 @@ class shcmd:
         return self
 
     def execute(self):
+        """execute command and returns output, error and error code"""
 
         cmd_string = " ".join(self._cmd)
 
@@ -148,12 +153,13 @@ class shcmd:
             return
 
         if self._stdout:
-            with open(self._stdout, self._stdmode) as f:
+            with open(self._stdout, self._stdmode) as fop:
                 if self._msg:
-                    print("[SHCMD]", self._msg, file=f)
-                print("[SHCMD]", cmd_string, file=f)
+                    print("[SHCMD]", self._msg, file=fop)
+                print("[SHCMD]", cmd_string, file=fop)
 
-        # NB stdmode always 'a' calling execute. Thus command string in stdout file
+        # NB: stdmode always 'a' calling execute.
+        # Thus command string in stdout file
         self._out, self._err, self._errorcode = execute(
             cmd_string, self._stdout, self._stderr, self._stdin, "a", self._silent
         )
@@ -161,22 +167,27 @@ class shcmd:
         return self._out, self._err, self._errorcode
 
     def output(self):
+        """return command output"""
         return self._out
 
     def error(self):
+        """return command error"""
         return self._err
 
     def stdout(self):
+        """return command stdout"""
         return self._stdout
 
     def stderr(self):
+        """return command stderr"""
         return self._stderr
 
     def stdin(self):
+        """return command stdinp"""
         return self._stdin
 
     def is_error(self):
+        """return true if command ends successfully and false otherwise"""
         if self._errorcode:
             return True
-        else:
-            return False
+        return False

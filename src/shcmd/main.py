@@ -1,10 +1,17 @@
+"""
+cli interface to shcmd module
+"""
 import argparse
+
 from . import shcmd
 
-__version__ = "0.7.4"
+__version__ = "0.7.5"
 
 
 def main():
+    """cli function to shcmd module.
+    Execute commands in a shell.
+    """
 
     parser = argparse.ArgumentParser(
         prog="shcmd",
@@ -89,7 +96,7 @@ def main():
 
     args = parser.parse_args()
 
-    c = shcmd.shcmd(
+    command = shcmd.shcmd(
         args.command,
         stdout=args.stdout,
         stderr=args.stderr,
@@ -101,7 +108,7 @@ def main():
         debug=args.debug,
     )
 
-    c()
+    command()
 
 
 if __name__ == "__main__":
